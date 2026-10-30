@@ -1,0 +1,49 @@
+// Renovate config for run-llama/aws-eks-auto-sandbox, our fork of
+// nuonco/aws-eks-auto-sandbox. run-llama/nuon pins it by commit in
+// llamaindex/sandbox.toml, so a change here applies only when that pin moves
+// and the sandbox is reprovisioned (customer installs: 10-day notice).
+// Runs from the self-hosted Renovate in run-llama/platform.
+// Validate with: npx --yes --package renovate@44.165.1 -- renovate-config-validator --strict
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: ['config:recommended'],
+
+  dependencyDashboard: true,
+  dependencyDashboardTitle: 'Renovate dependency dashboard',
+  dependencyDashboardHeader: 'Every update waits for approval here and applies only when run-llama/nuon moves its sandbox pin and the sandbox is reprovisioned. Keep add-ons inside the EKS support window of the pinned cluster_version. Never let a sync with upstream carry a retention change: run-llama/nuon pins cloudwatch_log_group_retention_in_days in llamaindex/sandbox.tfvars, and retention is a compliance decision. ingress-nginx is disabled: the project is retired (final release 4.15.1/1.15.1), and replacing it is a product decision.',
+
+  timezone: 'Etc/UTC',
+  schedule: ['* 0-11 * * 1'],
+  prHourlyLimit: 5,
+  prConcurrentLimit: 10,
+  minimumReleaseAge: '7 days',
+  internalChecksFilter: 'strict',
+  labels: ['dependencies', 'renovate'],
+
+  packageRules: [
+    {
+      description: 'Every update reaches a customer cluster on the next reprovision: approval only, never automerged',
+      matchFileNames: ['**'],
+      dependencyDashboardApproval: true,
+      automerge: false,
+    },
+    {
+      description: 'Cluster add-ons installed by helm_release (cert-manager, external-dns, metrics-server, kyverno, aws-load-balancer-controller) move together and must stay in the EKS support window (metrics-server 0.9 needs 1.34+)',
+      matchManagers: ['terraform'],
+      matchDepTypes: ['helm_release'],
+      groupName: 'sandbox add-ons',
+      groupSlug: 'sandbox-addons',
+    },
+    {
+      description: 'kubernetes/ingress-nginx is retired (final release 4.15.1/1.15.1, March 2026); nothing newer will come. Replacing it is a product decision',
+      matchDepNames: ['ingress-nginx'],
+      enabled: false,
+    },
+    {
+      description: 'Cluster-level infra: no EKS module majors via Renovate; they change the control plane and node groups',
+      matchDepNames: ['terraform-aws-modules/eks/aws'],
+      matchUpdateTypes: ['major'],
+      enabled: false,
+    },
+  ],
+}
