@@ -13,7 +13,10 @@
   dependencyDashboardHeader: 'Every update waits for approval here and applies only when run-llama/nuon moves its sandbox pin and the sandbox is reprovisioned. Keep add-ons inside the EKS support window of the pinned cluster_version. Never let a sync with upstream carry a retention change: run-llama/nuon pins cloudwatch_log_group_retention_in_days in llamaindex/sandbox.tfvars, and retention is a compliance decision. ingress-nginx is disabled: the project is retired (final release 4.15.1/1.15.1), and replacing it is a product decision.',
 
   timezone: 'Etc/UTC',
-  schedule: ['* 0-11 * * 1'],
+  // At any time during the 2026-10 KEV push (platform's renovate.yml runs every
+  // 4 hours); every update here waits for a checkbox anyway. Restore
+  // ['* 0-11 * * 1'] when platform goes back to the Monday cron.
+  schedule: ['at any time'],
   prHourlyLimit: 5,
   prConcurrentLimit: 10,
   minimumReleaseAge: '7 days',
