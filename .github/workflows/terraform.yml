@@ -41,12 +41,9 @@ jobs:
 
       - name: terraform init
         working-directory: ${{ matrix.dir }}
-        # A checked-in lock file must already match the providers (Renovate's
-        # lockfile PRs update it); nuon_dns has none.
-        run: |
-          lock=()
-          if [ -f .terraform.lock.hcl ]; then lock=(-lockfile=readonly); fi
-          terraform init -backend=false -input=false "${lock[@]}"
+        # The checked-in lock files pin provider versions but carry only macOS
+        # hashes, so init adds the linux ones in the runner (not -lockfile=readonly).
+        run: terraform init -backend=false -input=false
 
       - name: terraform validate
         working-directory: ${{ matrix.dir }}
