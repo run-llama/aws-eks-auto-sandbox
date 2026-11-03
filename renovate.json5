@@ -10,13 +10,14 @@
 
   dependencyDashboard: true,
   dependencyDashboardTitle: 'Renovate dependency dashboard',
-  dependencyDashboardHeader: 'Every update waits for approval here and applies only when run-llama/nuon moves its sandbox pin and the sandbox is reprovisioned. Keep add-ons inside the EKS support window of the pinned cluster_version. Never let a sync with upstream carry a retention change: run-llama/nuon pins cloudwatch_log_group_retention_in_days in llamaindex/sandbox.tfvars, and retention is a compliance decision. ingress-nginx is disabled: the project is retired (final release 4.15.1/1.15.1), and replacing it is a product decision.',
+  dependencyDashboardHeader: 'Minor and patch updates open PRs for review (CI runs terraform fmt and validate); majors wait for approval here. Every update applies only when run-llama/nuon moves its sandbox pin and the sandbox is reprovisioned. Keep add-ons inside the EKS support window of the pinned cluster_version. Never let a sync with upstream carry a retention change: run-llama/nuon pins cloudwatch_log_group_retention_in_days in llamaindex/sandbox.tfvars, and retention is a compliance decision. ingress-nginx is disabled: the project is retired (final release 4.15.1/1.15.1), and replacing it is a product decision.',
 
   timezone: 'Etc/UTC',
   // Nothing here automerges, so every PR needs a person.
   assignees: ['meyerkev'],
+  reviewers: ['meyerkev'],
   // At any time during the 2026-10 KEV push (platform's renovate.yml runs every
-  // 4 hours); every update here waits for a checkbox anyway. Restore
+  // 4 hours). Restore
   // ['* 0-11 * * 1'] when platform goes back to the Monday cron.
   schedule: ['at any time'],
   prHourlyLimit: 5,
@@ -27,10 +28,14 @@
 
   packageRules: [
     {
-      description: 'Every update reaches a customer cluster on the next reprovision: approval only, never automerged',
+      description: 'Every update reaches a customer cluster on the next reprovision: never automerged',
       matchFileNames: ['**'],
-      dependencyDashboardApproval: true,
       automerge: false,
+    },
+    {
+      description: 'Majors (providers, modules, add-on charts) are migrations: approval only',
+      matchUpdateTypes: ['major'],
+      dependencyDashboardApproval: true,
     },
     {
       description: 'Cluster add-ons installed by helm_release (cert-manager, external-dns, metrics-server, kyverno, aws-load-balancer-controller) move together and must stay in the EKS support window (metrics-server 0.9 needs 1.34+)',
